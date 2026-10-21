@@ -1,10 +1,12 @@
 # 南瓜头 · 法律打字练习
 
-在线使用：https://yolo-lele.github.io/mojian-typing/
+在线使用：https://yolo-lele.github.io/nanguatou-typing/
 
 `index.html` 是最终可独立运行的网页，内嵌全部 CSS、JavaScript、文章和图片；下载后直接打开即可使用。GitHub Pages 从 `main` 分支根目录自动部署。
 
 `nanguatou-source.zip` 保存同版本的可维护源码：独立 HTML、CSS、JavaScript、原始图片、来源与合成提示词、预览服务和 12 项核心逻辑测试。解压后运行 `node preview.cjs` 预览，运行 `node --test tests/core.test.cjs` 验证。
+
+字号支持 12–32px，共 21 档，每次调整 1px；浏览器自动记住选择，刷新后恢复。
 
 ## 最终效果
 

@@ -827,6 +827,7 @@ window.TYPING_ARTICLES = [
   const escape = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const HISTORY_KEY = 'mojian.history.v1';
   const CUSTOM_KEY = 'mojian.custom.v1';
+  const FONT_SIZE_KEY = 'nanguatou.reference-size.v1';
   let storageAvailable = true;
   let history = [];
   try {
@@ -835,7 +836,11 @@ window.TYPING_ARTICLES = [
   } catch { storageAvailable = false; }
   const state = {article:articles[0],mode:'free',limit:180,status:'ready',input:'',accumulated:0,startedAt:0,composing:false,pendingPause:false,sound:false,view:'practice'};
   let referenceChars = [], targetChars = [], toastTimer, pendingAction, audioContext, referenceSize=24, lastSecond=-1;
-  const minReferenceSize=20, maxReferenceSize=32;
+  const minReferenceSize=12, maxReferenceSize=32;
+  try {
+    const savedSize=Number(localStorage.getItem(FONT_SIZE_KEY));
+    if(Number.isInteger(savedSize)&&savedSize>=minReferenceSize&&savedSize<=maxReferenceSize)referenceSize=savedSize;
+  } catch {}
   function toast(message) { $('toast').textContent=message; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3200); }
   function elapsed() { return state.accumulated + (state.status==='running' ? (performance.now()-state.startedAt)/1000 : 0); }
   function timeText(seconds) { const n=Math.max(0,Math.floor(seconds)); return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`; }
@@ -1030,15 +1035,23 @@ window.TYPING_ARTICLES = [
   $('resultHistory').addEventListener('click',()=>{$('resultDialog').close();showView('history');});
   $('exportButton').addEventListener('click',exportHistory);
   $('focusButton').addEventListener('click',()=>{document.body.classList.toggle('focus-mode');setFocusLabel();});
-  function changeReferenceSize(step) {
-    referenceSize=Math.max(minReferenceSize,Math.min(maxReferenceSize,referenceSize+step));
+  function applyReferenceSize() {
     document.documentElement.style.setProperty('--reference-size',referenceSize+'px');
     $('decreaseFont').disabled=referenceSize===minReferenceSize;
     $('increaseFont').disabled=referenceSize===maxReferenceSize;
-    toast(`原文字号：${referenceSize}px`);
+    $('decreaseFont').title=`缩小字号（当前 ${referenceSize}px，最小 ${minReferenceSize}px）`;
+    $('increaseFont').title=`放大字号（当前 ${referenceSize}px，最大 ${maxReferenceSize}px）`;
   }
-  $('decreaseFont').addEventListener('click',()=>changeReferenceSize(-2));
-  $('increaseFont').addEventListener('click',()=>changeReferenceSize(2));
+  function changeReferenceSize(step) {
+    referenceSize=Math.max(minReferenceSize,Math.min(maxReferenceSize,referenceSize+step));
+    applyReferenceSize();
+    try {localStorage.setItem(FONT_SIZE_KEY,String(referenceSize));}
+    catch {toast(`字号：${referenceSize}px；浏览器存储不可用，暂时无法记住设置。`);return;}
+    toast(`字号：${referenceSize}px · 已记住`);
+  }
+  applyReferenceSize();
+  $('decreaseFont').addEventListener('click',()=>changeReferenceSize(-1));
+  $('increaseFont').addEventListener('click',()=>changeReferenceSize(1));
   $('soundButton').addEventListener('click',()=>{state.sound=!state.sound;$('soundButton').innerHTML=icon(state.sound?'volume':'volume-off');$('soundButton').classList.toggle('on',state.sound);$('soundButton').setAttribute('aria-label',state.sound?'关闭按键音':'开启按键音');$('soundButton').title=state.sound?'关闭按键音':'开启按键音';toast(state.sound?'按键音已开启':'按键音已关闭');soundTick();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.isComposing&&!state.composing&&!document.querySelector('dialog[open]')){e.preventDefault();togglePause();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.status==='running')pause();});
