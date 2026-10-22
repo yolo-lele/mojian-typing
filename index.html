@@ -528,6 +528,26 @@ body.focus-mode #typingInput { height: 180px; }
   .page-button { min-width: 30px; padding: 6px 8px; }
   .page-status { flex-basis: 100%; text-align: center; }
 }
+
+/* Dictation controls share the reading column without revealing the target text. */
+.exercise-options{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 28px 0}
+.exercise-options>span{font-size:12px;color:#846a77}
+.dictation-panel{flex:1;min-height:0;overflow:auto;border:1px solid #eadce5;border-radius:14px;background:rgba(255,249,252,.94);padding:18px}
+.speech-heading,.voice-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.speech-heading strong{font-size:17px;color:#754e65}
+#speechStatus{font-size:13px;line-height:1.7;margin:10px 0 14px;min-height:22px;color:#775d6c}
+.speech-actions,.speech-settings,.speech-checks{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.speech-actions button{padding:9px 12px;min-height:40px}
+.voice-label{display:block;margin-top:18px;margin-bottom:6px;font-size:12px;color:#846a77}
+.voice-row select{min-width:0;flex:1;width:100%}.voice-row button{flex-shrink:0;font-size:12px}
+.dictation-panel select{border:1px solid #e4ceda;background:#fff;border-radius:8px;padding:8px;color:#624454;font:inherit;font-size:13px}
+.speech-settings{margin-top:14px;gap:18px}.speech-settings label,.speech-checks label{font-size:13px;color:#755668}
+.speech-checks{margin-top:14px;gap:18px}.speech-checks label{display:flex;align-items:center;gap:5px}.speech-checks input{accent-color:#bc6b94;width:16px;height:16px;margin:0}
+.speech-note{font-size:12px;line-height:1.8;color:#907786;margin:14px 0 0}
+.reading-area.listening:has(#referenceWrap:not([hidden])){height:auto;min-height:400px}
+.reading-area.listening #referenceWrap:not([hidden]){min-height:200px;max-height:350px;margin-top:12px}
+.reading-area.listening:has(#referenceWrap:not([hidden])) .dictation-panel{flex:none}
+@media(max-width:700px){.exercise-options{padding:12px 16px 0}.dictation-panel{padding:14px}.speech-actions{gap:6px}.speech-actions button{font-size:12px;padding:8px 10px}.reading-area.listening{height:auto;min-height:360px}.speech-heading strong{font-size:16px}.exercise-options>span{font-size:11px}}
 </style>
   <style>/* Hide the native pointer only after the transparent toy image has loaded. */
 #toyCursor { display: none; pointer-events: none; user-select: none; }
@@ -543,6 +563,7 @@ body.focus-mode #typingInput { height: 180px; }
   }
 }
 </style>
+  
   
   
   
@@ -583,14 +604,24 @@ body.focus-mode #typingInput { height: 180px; }
         </div>
         </div>
         <article class="typing-card">
-          <div class="article-heading"><div class="article-title-row"><span class="article-mascot" aria-hidden="true"><img data-embedded-asset="embedded-asset-3" width="44" height="48" alt=""></span><div class="article-info"><span class="article-tag" id="articleCategory">生活民法</span><h2 id="articleTitle">把约定写清楚，让生活更安心</h2><span class="difficulty" id="articleDifficulty">轻松</span></div></div><div class="article-tools"><div class="font-controls" role="group" aria-label="原文字号"><button class="icon-button font-button" id="decreaseFont" title="缩小字号" aria-label="缩小字号" aria-controls="reference">−</button><button class="icon-button font-button" id="increaseFont" title="放大字号" aria-label="放大字号" aria-controls="reference">＋</button></div><span class="tool-divider"></span><button class="text-button" id="switchArticle"><span data-icon="shuffle"></span>换一篇</button></div></div>
+          <div class="article-heading"><div class="article-title-row"><span class="article-mascot" aria-hidden="true"><img data-embedded-asset="embedded-asset-3" width="44" height="48" alt=""></span><div class="article-info"><span class="article-tag" id="articleCategory">民事文书</span><h2 id="articleTitle">正在载入文书…</h2><span class="difficulty" id="articleDifficulty">轻松</span></div></div><div class="article-tools"><div class="font-controls" role="group" aria-label="原文字号"><button class="icon-button font-button" id="decreaseFont" title="缩小字号" aria-label="缩小字号" aria-controls="reference">−</button><button class="icon-button font-button" id="increaseFont" title="放大字号" aria-label="放大字号" aria-controls="reference">＋</button></div><span class="tool-divider"></span><button class="text-button" id="switchArticle"><span data-icon="shuffle"></span>换一篇</button></div></div>
           <details class="article-source" id="articleSource" hidden><summary>查看文书来源与说明</summary><div id="articleSourceContent"></div></details>
+          <div class="exercise-options"><div class="segmented" role="group" aria-label="练习方式"><button class="selected" data-exercise="copy" aria-pressed="true">对照打字</button><button data-exercise="dictation" aria-pressed="false"><span data-icon="volume"></span>听写模式</button></div><span>输入第一个字开始计时</span></div>
           <div class="practice-columns">
-          <div class="reading-area"><div class="reference-topline"><span data-icon="book"></span>对照原文</div>
-          <div class="reference-wrap" id="referenceWrap"><div class="reference" id="reference" aria-label="对照文章原文"></div></div>
-          <div class="reference-footer"><span><i class="legend-dot good"></i>已正确输入 <i class="legend-dot bad"></i>输入有误</span><span class="reference-note">标点与空格也计入字符</span></div>
+          <div class="reading-area"><div class="reference-topline"><span data-icon="book"></span><span id="referenceLabel">对照原文</span></div>
+          <div id="dictationPanel" class="dictation-panel" hidden>
+            <div class="speech-heading"><strong id="speechPosition">准备听写</strong><button class="text-button" id="showDictationText" aria-controls="referenceWrap" aria-expanded="false">查看原文</button></div>
+            <p id="speechStatus" role="status">准备好后，点击播放。</p>
+            <div class="speech-actions"><button class="secondary-button" id="speechPrevious">上一句</button><button class="primary-button" id="speechPlay">播放本句</button><button class="secondary-button" id="speechNext">下一句</button><button class="text-button" id="speechRepeat">重听本句</button></div>
+            <label class="voice-label" for="speechVoice">朗读声音</label><div class="voice-row"><select id="speechVoice" aria-label="朗读声音"></select><button class="text-button" id="refreshSpeechVoices">重新检测</button></div>
+            <div class="speech-settings"><label>语速 <select id="speechRate"><option value="0.6">0.6 倍</option><option value="0.8" selected>0.8 倍</option><option value="1">1.0 倍</option><option value="1.2">1.2 倍</option><option value="1.5">1.5 倍</option></select></label><label>句间停顿 <select id="speechGap"><option value="1">1 秒</option><option value="2">2 秒</option><option value="3" selected>3 秒</option><option value="5">5 秒</option></select></label></div>
+            <div class="speech-checks"><label><input type="checkbox" id="speechContinuous"> 连续朗读</label><label><input type="checkbox" id="speechPunctuation" checked> 读出标点与换行</label></div>
+            <p class="speech-note">默认逐句听写，长句自动分段。暂停朗读时仍可输入；暂停练习请用下方「暂停」。</p>
           </div>
-          <div class="input-area"><div class="input-topline"><label for="typingInput"><span data-icon="edit"></span>对照原文输入</label><span id="statusLabel" class="status-label">等待开始</span></div><div class="textarea-wrap"><textarea id="typingInput" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="输入第一个字，开始计时…" aria-describedby="inputTip"></textarea><div class="pause-overlay" id="pauseOverlay" hidden><span data-icon="pause"></span><strong>休息一下，也很好。</strong><button class="primary-button" id="overlayResume">继续练习<span data-icon="play"></span></button></div></div><div class="input-footer"><span id="inputTip"><span data-icon="info"></span>支持中文输入法 · 可退格修改</span><span id="compositionStatus"></span></div></div>
+          <div class="reference-wrap" id="referenceWrap"><div class="reference" id="reference" aria-label="对照文章原文"></div></div>
+          <div class="reference-footer" id="referenceLegend"><span><i class="legend-dot good"></i>已正确输入 <i class="legend-dot bad"></i>输入有误</span><span class="reference-note">标点与空格也计入字符</span></div>
+          </div>
+          <div class="input-area"><div class="input-topline"><label for="typingInput"><span data-icon="edit"></span><span id="inputLabel">对照原文输入</span></label><span id="statusLabel" class="status-label">等待开始</span></div><div class="textarea-wrap"><textarea id="typingInput" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="输入第一个字，开始计时…" aria-describedby="inputTip"></textarea><div class="pause-overlay" id="pauseOverlay" hidden><span data-icon="pause"></span><strong>休息一下，也很好。</strong><button class="primary-button" id="overlayResume">继续练习<span data-icon="play"></span></button></div></div><div class="input-footer"><span id="inputTip"><span data-icon="info"></span>支持中文输入法 · 可退格修改</span><span id="compositionStatus"></span></div></div>
           </div>
           <div class="practice-footer"><div class="footer-left"><button class="text-button" id="restartButton"><span data-icon="refresh"></span>重新开始</button><button class="sound-button" id="soundButton" aria-label="开启按键音" title="开启按键音"><span data-icon="volume-off"></span></button></div><div class="footer-actions"><button class="secondary-button" id="pauseButton" disabled><span data-icon="pause"></span><span>暂停</span></button><button class="primary-button" id="finishButton" disabled>结束练习<span data-icon="arrow"></span></button></div></div>
         </article>
@@ -611,7 +642,7 @@ body.focus-mode #typingInput { height: 180px; }
   </div>
   <dialog id="customDialog"><form id="customForm"><div class="dialog-top"><div><h2>自定义文章</h2></div><button type="button" class="icon-button" data-close="customDialog" aria-label="关闭"><span data-icon="close"></span></button></div><label class="field-label" for="customTitle">文章标题</label><input id="customTitle" maxlength="60" placeholder="给这段文字起个名字（选填）"><label class="field-label" for="customText">文章内容 <span>10–5,000 个字符</span></label><textarea id="customText" rows="8" required placeholder="粘贴一篇文章、一段摘抄，或自己写的文字…"></textarea><div class="custom-count"><span id="customError" role="alert"></span><span id="customCount">0 字符</span></div><p class="dialog-note">保留标点与段落，自动去除首尾空白。内容只保存在当前浏览器。</p><div class="dialog-actions"><button type="button" class="secondary-button" data-close="customDialog">取消</button><button type="submit" class="primary-button">开始这篇练习<span data-icon="arrow"></span></button></div></form></dialog>
   <dialog id="resultDialog" class="result-dialog"><div class="result-top"><button class="icon-button" data-close="resultDialog" aria-label="关闭结果"><span data-icon="close"></span></button><span class="result-flower labubu-sticker" aria-hidden="true"><img data-embedded-asset="embedded-asset-4" alt="" width="88" height="88"></span><h2 id="resultTitle">这一段专注，值得记录。</h2><p id="resultSubtitle"></p></div><div id="resultMetrics" class="result-metrics"></div><div class="result-feedback" id="resultFeedback"></div><div class="result-errors" id="resultErrors"></div><p class="result-saved" id="resultSaved"><span data-icon="check"></span>本次练习已保存在练习记录中</p><div class="dialog-actions"><button class="secondary-button" id="resultHistory">查看记录</button><button class="primary-button" id="resultAgain">再练一次<span data-icon="refresh"></span></button></div></dialog>
-  <dialog id="helpDialog"><div class="dialog-top"><h2>南瓜头 · 使用说明</h2><button class="icon-button" data-close="helpDialog" aria-label="关闭"><span data-icon="close"></span></button></div><div class="help-content"><p><strong>怎么开始</strong> 对照原文，在输入框敲下第一个字即开始计时。中文输入法组词时不会判错，选词提交后才计算。</p><p><strong>两种模式</strong> 自由练习按自己的节奏完成全文；限时挑战可选 1、3、5 分钟，时间到自动结算。输入达到文章长度也会结束。</p><p><strong>统计口径</strong> 速度 = 当前正确字符数 ÷ 实际练习分钟数；正确率 = 当前正确字符数 ÷ 当前输入字符数。逐位置比较，标点、空格和换行都计入，退格修改会更新结果。</p><p><strong>暂停与记录</strong> 按 Esc 或点击暂停，暂停时间不计入成绩。离开页面会自动暂停。结束后记录保存在当前浏览器，清除浏览器数据会删除记录。</p><p><strong>小提示</strong> 练习框禁止粘贴；自己的文章请通过「自定义文章」添加。内置 50 篇书记员速录文书，其中 25 篇为法院公开判决书原文，25 篇为依据真实案件改写的起诉状。篇幅随原文保留。展开「查看文书来源与说明」可查阅对应法院页面。</p></div></dialog>
+  <dialog id="helpDialog"><div class="dialog-top"><h2>南瓜头 · 使用说明</h2><button class="icon-button" data-close="helpDialog" aria-label="关闭"><span data-icon="close"></span></button></div><div class="help-content"><p><strong>怎么开始</strong> 对照原文，在输入框敲下第一个字即开始计时。中文输入法组词时不会判错，选词提交后才计算。</p><p><strong>听写模式</strong> 切换到听写后，原文默认隐藏。点击播放本句，写好后点下一句；也可开启连续朗读、调整语速和句间停顿。暂停后继续会重听本句。默认读出标点和换行，仍按原文逐字评分。查看原文会在成绩中注明。声音由浏览器和系统提供，在线声音需要联网。</p><p><strong>两种计时方式</strong> 自由练习按自己的节奏完成全文；限时挑战可选 1、3、5 分钟，时间到自动结算。输入达到文章长度也会结束。</p><p><strong>统计口径</strong> 速度 = 当前正确字符数 ÷ 实际练习分钟数；正确率 = 当前正确字符数 ÷ 当前输入字符数。逐位置比较，标点、空格和换行都计入，退格修改会更新结果。</p><p><strong>暂停与记录</strong> 按 Esc 或点击暂停，暂停时间不计入成绩。离开页面会自动暂停。结束后记录保存在当前浏览器，清除浏览器数据会删除记录。</p><p><strong>小提示</strong> 练习框禁止粘贴；自己的文章请通过「自定义文章」添加。内置 50 篇书记员速录文书，其中 25 篇为法院公开判决书原文，25 篇为依据真实案件改写的起诉状。篇幅随原文保留。展开「查看文书来源与说明」可查阅对应法院页面。</p></div></dialog>
   <dialog id="confirmDialog" class="small-dialog"><h2>开始新的练习？</h2><p>当前练习尚未结算，切换后本次输入会清空。</p><div class="dialog-actions"><button class="secondary-button" id="confirmCancel">继续当前练习</button><button class="primary-button" id="confirmOk">切换并重置</button></div></dialog>
   <img id="toyCursor" data-embedded-asset="embedded-asset-4" alt="" aria-hidden="true" width="48" height="48">
   <div class="toast" id="toast" role="status"></div>
@@ -1744,6 +1775,80 @@ window.TYPING_ARTICLES = [
 
 </script>
 <script>
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.TypingDictation=api;
+})(typeof window!=='undefined'?window:globalThis,()=>{
+  'use strict';
+  // Preserve every target character; split long legal paragraphs into speakable phrases.
+  function splitText(text,max=72){
+    const pieces=[];let part='';
+    for(const character of Array.from(String(text).replace(/\r\n?/g,'\n'))){
+      part+=character;
+      if(/[。！？；\n]/.test(character)||Array.from(part).length>=max){pieces.push(part);part='';}
+    }
+    if(part)pieces.push(part);
+    return pieces;
+  }
+  function spokenText(text,punctuation=true){
+    if(!punctuation)return text;
+    const names={'，':'逗号','。':'句号','、':'顿号','；':'分号','：':'冒号','？':'问号','！':'感叹号','（':'左括号','）':'右括号','(':'左括号',')':'右括号','《':'左书名号','》':'右书名号','“':'左双引号','”':'右双引号','‘':'左单引号','’':'右单引号','【':'左方括号','】':'右方括号','[':'左方括号',']':'右方括号','\n':'换行','\t':'制表符',' ':'空格',',':'英文逗号',';':'英文分号',':':'英文冒号','%':'百分号','％':'全角百分号','‰':'千分号','＋':'加号','+':'加号','=':'等于号','×':'乘号','／':'斜杠','/':'斜杠','—':'破折号','…':'省略号'};
+    const chars=Array.from(text);
+    return chars.map((c,i)=>{
+      if(c==='.')return /\d/.test(chars[i-1]||'')&&/\d/.test(chars[i+1]||'')?c:' 英文句点 ';
+      return names[c]?' '+names[c]+' ':c;
+    }).join('');
+  }
+  function createPlayer({synthesis,Utterance,onChange=()=>{},onError=()=>{},schedule=setTimeout,unschedule=clearTimeout}){
+    let parts=[],index=0,status='idle',generation=0,timer=null,utterance=null;
+    let settings={rate:0.8,voice:null,lang:'zh-CN',punctuation:true,continuous:false,gap:3000};
+    const snapshot=()=>({index,total:parts.length,status});
+    const changed=()=>onChange(snapshot());
+    function cancel(){
+      generation++;
+      if(timer!==null)unschedule(timer);
+      timer=null;
+      if(utterance){utterance.onend=null;utterance.onerror=null;utterance.onstart=null;}
+      utterance=null;
+      synthesis.cancel();
+    }
+    function play(){
+      if(!parts.length)return;
+      cancel();const token=generation;
+      const speech=new Utterance(spokenText(parts[index],settings.punctuation));
+      utterance=speech;
+      speech.lang=settings.voice?.lang||settings.lang;speech.voice=settings.voice;speech.rate=settings.rate;
+      status='playing';changed();
+      speech.onend=()=>{
+        if(token!==generation)return;
+        utterance=null;
+        if(settings.continuous&&index<parts.length-1){
+          status='gap';changed();
+          timer=schedule(()=>{if(token!==generation)return;timer=null;index++;play();},settings.gap);
+        }else{status=index===parts.length-1?'ended':'ready';changed();}
+      };
+      speech.onerror=event=>{
+        if(token!==generation)return;
+        utterance=null;status='error';changed();onError(event.error||'unknown');
+      };
+      try{synthesis.speak(speech);}catch{status='error';changed();onError('unavailable');}
+    }
+    return {
+      snapshot,
+      load(text,lang='zh-CN'){cancel();parts=splitText(text);index=0;status='idle';settings.lang=lang;changed();},
+      configure(options){Object.assign(settings,options);},
+      play,
+      pause(){if(['playing','gap'].includes(status)){cancel();status='paused';changed();}},
+      stop(){cancel();status='idle';changed();},
+      move(delta){cancel();index=Math.max(0,Math.min(parts.length-1,index+delta));status='ready';changed();play();}
+    };
+  }
+  return {splitText,spokenText,createPlayer};
+});
+
+</script>
+<script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -1778,7 +1883,10 @@ window.TYPING_ARTICLES = [
     const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
     if (Array.isArray(raw)) history = raw.filter(r => r && typeof r.title === 'string' && typeof r.at === 'string' && Number.isFinite(Date.parse(r.at)) && ['speed','accuracy','elapsed','correct','typed','total','progress'].every(k => typeof r[k] === 'number' && Number.isFinite(r[k]) && r[k] >= 0)).slice(0,100);
   } catch { storageAvailable = false; }
-  const state = {article:articles[0],mode:'free',limit:180,status:'ready',input:'',accumulated:0,startedAt:0,composing:false,pendingPause:false,sound:false,view:'practice'};
+  const state = {article:articles[0],mode:'free',exercise:'copy',revealed:false,peeked:false,limit:180,status:'ready',input:'',accumulated:0,startedAt:0,composing:false,pendingPause:false,sound:false,view:'practice'};
+  const speechAvailable=!!(window.speechSynthesis&&window.SpeechSynthesisUtterance);
+  let speechVoices=[];
+  const dictation=speechAvailable?window.TypingDictation.createPlayer({synthesis:window.speechSynthesis,Utterance:window.SpeechSynthesisUtterance,onChange:renderDictation,onError:()=>{pause();$('speechStatus').textContent='朗读未成功，请更换声音后重试。';}}):null;
   let referenceChars = [], targetChars = [], toastTimer, pendingAction, audioContext, referenceSize=24, lastSecond=-1;
   const minReferenceSize=12, maxReferenceSize=32;
   try {
@@ -1816,6 +1924,7 @@ window.TYPING_ARTICLES = [
     $('pauseButton').innerHTML=icon(state.status==='paused'?'play':'pause')+`<span>${state.status==='paused'?'继续':'暂停'}</span>`;
     $('finishButton').disabled=!state.input.length||state.status==='finished';
     updateTime();
+    renderDictation();
   }
   function renderReference() {
     targetChars=core.chars(state.article.text);
@@ -1831,21 +1940,26 @@ window.TYPING_ARTICLES = [
     const input=core.chars(state.input);
     referenceChars.forEach((span,i)=>span.className=i<input.length?(input[i]===targetChars[i]?'correct':'incorrect'):i===input.length?'current':'');
     const current=referenceChars[Math.min(input.length,targetChars.length-1)];
-    if(current && state.status==='running') {
+    if(current && state.status==='running' && !$('referenceWrap').hidden) {
       const box=$('referenceWrap'),rect=current.getBoundingClientRect(),container=box.getBoundingClientRect();
       if(rect.bottom>container.bottom-15||rect.top<container.top) box.scrollTop+=rect.top-container.top-box.clientHeight*.35;
     }
   }
   function reset() {
+    dictation?.stop();
+    state.revealed=false;state.peeked=false;
     state.status='ready';state.input='';state.accumulated=0;state.startedAt=0;state.composing=false;state.pendingPause=false;lastSecond=-1;
     $('typingInput').value='';$('compositionStatus').textContent='';
     $('articleTitle').textContent=state.article.title;$('articleCategory').textContent=state.article.category;$('articleDifficulty').textContent=state.article.difficulty;
     document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('selected',b.dataset.mode===state.mode);b.setAttribute('aria-pressed',b.dataset.mode===state.mode);});
     $('durationWrap').hidden=state.mode!=='timed';$('duration').value=state.limit;
-    renderArticleSource();renderReference();updateMetrics();updateStatus();
+    renderArticleSource();renderReference();
+    dictation?.load(state.article.text,state.article.language==='en'?'en-US':'zh-CN');
+    loadSpeechVoices();renderExercise();updateMetrics();updateStatus();
   }
   function start() { if(state.status==='ready'){state.status='running';state.startedAt=performance.now();updateStatus();} }
   function pause() {
+    dictation?.pause();
     if(state.status!=='running') return;
     if(state.mode==='timed'&&elapsed()>=state.limit){finish('timeout');return;}
     state.accumulated=elapsed();state.status='paused';
@@ -1853,7 +1967,7 @@ window.TYPING_ARTICLES = [
     updateStatus();updateMetrics();
   }
   function resume() {if(state.status==='paused'){state.status='running';state.startedAt=performance.now();updateStatus();$('typingInput').focus();}}
-  function togglePause() {if(state.status==='running')pause();else if(state.status==='paused')resume();}
+  function togglePause() {if(state.status==='running')pause();else if(state.status==='paused')resume();else dictation?.pause();}
   function soundTick() {
     if(!state.sound)return;
     try {audioContext ||= new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume();const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();oscillator.type='sine';oscillator.frequency.value=520;gain.gain.setValueAtTime(.025,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+.045);oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start();oscillator.stop(audioContext.currentTime+.05);}catch{state.sound=false;}
@@ -1875,16 +1989,17 @@ window.TYPING_ARTICLES = [
   }
   function finish(reason='manual') {
     if(!['running','paused'].includes(state.status))return;
+    dictation?.stop();
     const actual=elapsed();
     state.accumulated=reason==='timeout'?Math.min(actual,state.limit):actual;
     state.status='finished';state.composing=false;state.pendingPause=false;
     $('typingInput').value=state.input;$('compositionStatus').textContent='';
     updateStatus();updateMetrics();
     const m=metrics();
-    const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:state.article.title,at:new Date().toISOString(),mode:state.mode,limit:state.limit,reason,elapsed:state.accumulated,...m};
+    const record={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:state.article.title,at:new Date().toISOString(),mode:state.mode,exercise:state.exercise,peeked:state.peeked,limit:state.limit,reason,elapsed:state.accumulated,...m};
     history.unshift(record);history=history.slice(0,100);const saved=persistHistory();
     $('resultTitle').textContent=reason==='complete'?'这一篇，认真打完了。':reason==='timeout'?'时间到了，进步留下。':'这一段专注，值得记录。';
-    $('resultSubtitle').textContent=`${state.article.title} · ${state.mode==='free'?'自由练习':`${state.limit/60} 分钟挑战`} · 完成 ${Math.floor(m.progress)}%`;
+    $('resultSubtitle').textContent=`${state.article.title} · ${exerciseLabel(state)} · ${state.mode==='free'?'自由练习':`${state.limit/60} 分钟挑战`} · 完成 ${Math.floor(m.progress)}%`;
     $('resultMetrics').innerHTML=`<div><strong>${Math.round(m.speed)}</strong><span>正确字符 / 分钟</span></div><div><strong>${m.accuracy.toFixed(1)}<small>%</small></strong><span>正确率</span></div><div><strong>${timeText(state.accumulated)}</strong><span>实际用时</span></div>`;
     $('resultFeedback').textContent=m.typed===0?'这次还没有提交文字，下次从第一个字开始。':m.accuracy>=98?'准确的每一字，都是稳定进步的起点。保持这份从容。':m.accuracy>=90?'节奏已经慢慢建立。下一次，试着给标点和错字多一点耐心。':'放慢一点，先让每个字符准确落位。速度会随着练习慢慢到来。';
     const entered=core.chars(state.input), errors=[];
@@ -1895,6 +2010,57 @@ window.TYPING_ARTICLES = [
     renderHistory();
     if($('helpDialog').open)$('helpDialog').close();
     $('resultDialog').showModal();
+  }
+  function exerciseLabel(record){return record.exercise==='dictation'?'听写'+(record.peeked?'（查看过原文）':''):'对照打字';}
+  function renderExercise(){
+    const listening=state.exercise==='dictation';
+    document.querySelectorAll('[data-exercise]').forEach(button=>{const selected=button.dataset.exercise===state.exercise;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',selected);});
+    $('dictationPanel').hidden=!listening;
+    $('referenceWrap').hidden=listening&&!state.revealed;
+    $('referenceLegend').hidden=listening&&!state.revealed;
+    $('referenceLabel').textContent=listening?'听写练习':'对照原文';
+    $('inputLabel').textContent=listening?'根据朗读输入':'对照原文输入';
+    $('typingInput').placeholder=listening?'点击「播放本句」，听到后输入…':'输入第一个字，开始计时…';
+    $('showDictationText').textContent=state.revealed?'隐藏原文':'查看原文';
+    $('showDictationText').setAttribute('aria-expanded',state.revealed);
+    document.querySelector('.reading-area').classList.toggle('listening',listening);
+    renderDictation();
+  }
+  function renderDictation(){
+    const snapshot=dictation?.snapshot()||{index:0,total:0,status:'idle'};
+    const unavailable=!speechAvailable||!speechVoices.length;
+    const locked=state.status==='finished';
+    $('speechPlay').disabled=unavailable||locked;
+    $('speechPrevious').disabled=unavailable||locked||snapshot.index===0;
+    $('speechNext').disabled=unavailable||locked||snapshot.index>=snapshot.total-1;
+    $('speechRepeat').disabled=unavailable||locked;
+    const playing=['playing','gap'].includes(snapshot.status);
+    $('speechPlay').textContent=playing?'暂停朗读':snapshot.status==='paused'?'继续本句':'播放本句';
+    $('speechPosition').textContent=`第 ${snapshot.total?snapshot.index+1:0} / ${snapshot.total} 段`;
+    const labels={idle:'准备好后，点击播放。',playing:'正在朗读，听到后输入。',gap:'句间停顿中…',paused:'朗读已暂停，继续时从本句开头重听。',ready:'本句已读完，写好后点「下一句」。',ended:'全文已读完，输入完成后可结束练习。',error:'朗读未成功，请更换声音后重试。'};
+    $('speechStatus').textContent=!speechAvailable?'当前浏览器不支持朗读，请使用支持语音合成的浏览器。':!speechVoices.length?'未检测到匹配的朗读声音，可点击重新检测，或在系统中安装对应语言语音包。':locked?'本次练习已结束。':labels[snapshot.status];
+  }
+  function loadSpeechVoices(){
+    if(!speechAvailable){renderDictation();return;}
+    const selected=$('speechVoice').value;
+    const english=state.article.language==='en';
+    speechVoices=window.speechSynthesis.getVoices().filter(v=>english?/^en([-_]|$)/i.test(v.lang):/^(zh|cmn)([-_]|$)/i.test(v.lang));
+    speechVoices.sort((a,b)=>Number(/zh[-_]CN|cmn[-_]Hans/i.test(b.lang))-Number(/zh[-_]CN|cmn[-_]Hans/i.test(a.lang))||Number(b.localService)-Number(a.localService));
+    $('speechVoice').replaceChildren(...speechVoices.map(v=>{const option=document.createElement('option');option.value=v.voiceURI;option.textContent=v.name+' · '+v.lang+(v.localService?'':' · 在线');return option;}));
+    if(speechVoices.some(v=>v.voiceURI===selected))$('speechVoice').value=selected;
+    $('speechVoice').disabled=!speechVoices.length;
+    renderDictation();
+  }
+  function speechSettings(){
+    dictation?.configure({voice:speechVoices.find(v=>v.voiceURI===$('speechVoice').value)||null,rate:Number($('speechRate').value),punctuation:$('speechPunctuation').checked,continuous:$('speechContinuous').checked,gap:Number($('speechGap').value)*1000});
+  }
+  function playDictation(delta=0){
+    if(!dictation||!speechVoices.length||state.status==='finished'||state.view!=='practice')return;
+    if(state.status==='paused')resume();
+    speechSettings();
+    // Timing keeps the same rule as copy practice: the first entered character starts it.
+    if(delta)dictation.move(delta);else dictation.play();
+    $('typingInput').focus();
   }
   function requestReset(action) {
     if(active()){pause();pendingAction=action;$('confirmDialog').showModal();}
@@ -1959,11 +2125,11 @@ window.TYPING_ARTICLES = [
     $('historyStats').innerHTML=`<div class="summary-card"><span>累计练习</span><strong>${history.length}<small>次</small></strong></div><div class="summary-card"><span>最高速度</span><strong>${Math.round(best)}<small>字 / 分</small></strong></div><div class="summary-card"><span>专注时长</span><strong>${minutes.toFixed(1)}<small>分钟</small></strong></div>`;
     $('historyCount').textContent=`${history.length} 次`;$('exportButton').disabled=!history.length;
     if(!history.length){$('historyList').innerHTML=`<div class="empty-state"><span>✳</span><h3>你的第一段足迹，即将开始。</h3><p>完成一次练习，就会在这里留下记录。</p><button class="primary-button" id="emptyStart">开始练习 ${icon('arrow')}</button></div>`;$('emptyStart').addEventListener('click',()=>showView('practice'));return;}
-    $('historyList').innerHTML=`<div class="history-table-wrap"><table class="history-table"><thead><tr><th>文章 / 时间</th><th>速度</th><th>正确率</th><th>用时</th><th>进度</th></tr></thead><tbody>${history.map(r=>`<tr><td>${escape(r.title)}<small>${new Date(r.at).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${r.mode==='timed'?'限时挑战':'自由练习'}${r.reason==='manual'?' · 提前结束':''}</small></td><td><strong>${Math.round(r.speed)}</strong> 字/分</td><td>${r.accuracy.toFixed(1)}%</td><td>${timeText(r.elapsed)}</td><td>${Math.floor(r.progress)}%</td></tr>`).join('')}</tbody></table></div>`;
+    $('historyList').innerHTML=`<div class="history-table-wrap"><table class="history-table"><thead><tr><th>文章 / 时间</th><th>速度</th><th>正确率</th><th>用时</th><th>进度</th></tr></thead><tbody>${history.map(r=>`<tr><td>${escape(r.title)}<small>${new Date(r.at).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${exerciseLabel(r)} · ${r.mode==='timed'?'限时挑战':'自由练习'}${r.reason==='manual'?' · 提前结束':''}</small></td><td><strong>${Math.round(r.speed)}</strong> 字/分</td><td>${r.accuracy.toFixed(1)}%</td><td>${timeText(r.elapsed)}</td><td>${Math.floor(r.progress)}%</td></tr>`).join('')}</tbody></table></div>`;
   }
   function exportHistory() {
     const cell=v=>`"${String(v).replace(/^[=+@-]/,"'$&").replace(/"/g,'""')}"`;
-    const rows=[['文章','时间','模式','速度（正确字符/分钟）','正确率（%）','用时（秒）','输入字符','正确字符','总字符','完成度（%）'],...history.map(r=>[r.title,new Date(r.at).toLocaleString('zh-CN'),r.mode==='timed'?'限时挑战':'自由练习',r.speed.toFixed(1),r.accuracy.toFixed(1),r.elapsed.toFixed(1),r.typed,r.correct,r.total,r.progress.toFixed(1)])];
+    const rows=[['文章','时间','练习方式','模式','速度（正确字符/分钟）','正确率（%）','用时（秒）','输入字符','正确字符','总字符','完成度（%）'],...history.map(r=>[r.title,new Date(r.at).toLocaleString('zh-CN'),exerciseLabel(r),r.mode==='timed'?'限时挑战':'自由练习',r.speed.toFixed(1),r.accuracy.toFixed(1),r.elapsed.toFixed(1),r.typed,r.correct,r.total,r.progress.toFixed(1)])];
     const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const a=document.createElement('a');a.href=url;a.download=`南瓜头练习记录-${new Date().toLocaleDateString('sv-SE')}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('练习记录已导出');
   }
@@ -1975,6 +2141,16 @@ window.TYPING_ARTICLES = [
   $('typingInput').addEventListener('beforeinput',e=>{if(['insertFromPaste','insertFromDrop'].includes(e.inputType)){e.preventDefault();toast('练习时请逐字输入');}});
   $('typingInput').addEventListener('keydown',e=>{if(e.key==='Tab'&&!e.shiftKey&&targetChars[core.chars(state.input).length]==='\t'){e.preventDefault();const el=e.target;el.setRangeText('\t',el.selectionStart,el.selectionEnd,'end');commitInput();}});
   $('pauseButton').addEventListener('click',togglePause);$('overlayResume').addEventListener('click',resume);
+  document.querySelectorAll('[data-exercise]').forEach(button=>button.addEventListener('click',()=>{if(state.exercise!==button.dataset.exercise)requestReset(()=>{state.exercise=button.dataset.exercise;reset();});}));
+  $('speechPlay').addEventListener('click',()=>{if(['playing','gap'].includes(dictation?.snapshot().status))dictation.pause();else playDictation();});
+  $('speechPrevious').addEventListener('click',()=>playDictation(-1));
+  $('speechNext').addEventListener('click',()=>playDictation(1));
+  $('speechRepeat').addEventListener('click',()=>playDictation());
+  $('showDictationText').addEventListener('click',()=>{state.revealed=!state.revealed;if(state.revealed)state.peeked=true;renderExercise();updateReference();});
+  $('refreshSpeechVoices').addEventListener('click',loadSpeechVoices);
+  ['speechVoice','speechRate','speechGap','speechContinuous','speechPunctuation'].forEach(id=>$(id).addEventListener('change',()=>{dictation?.pause();speechSettings();}));
+  if(speechAvailable)window.speechSynthesis.addEventListener('voiceschanged',loadSpeechVoices);
+  window.addEventListener('pagehide',()=>dictation?.stop());
   $('finishButton').addEventListener('click',()=>finish());
   $('restartButton').addEventListener('click',()=>requestReset(()=>{reset();$('typingInput').focus();}));
   $('switchArticle').addEventListener('click',()=>{const index=articles.findIndex(a=>a.id===state.article.id);useArticle(articles[(index+1)%articles.length]);});
@@ -2015,7 +2191,7 @@ window.TYPING_ARTICLES = [
   $('increaseFont').addEventListener('click',()=>changeReferenceSize(1));
   $('soundButton').addEventListener('click',()=>{state.sound=!state.sound;$('soundButton').innerHTML=icon(state.sound?'volume':'volume-off');$('soundButton').classList.toggle('on',state.sound);$('soundButton').setAttribute('aria-label',state.sound?'关闭按键音':'开启按键音');$('soundButton').title=state.sound?'关闭按键音':'开启按键音';toast(state.sound?'按键音已开启':'按键音已关闭');soundTick();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.isComposing&&!state.composing&&!document.querySelector('dialog[open]')){e.preventDefault();togglePause();}});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.status==='running')pause();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
   window.addEventListener('beforeunload',e=>{if(active()){e.preventDefault();e.returnValue='';}});
   setInterval(()=>{if(state.status!=='running')return;if(state.mode==='timed'&&elapsed()>=state.limit){finish('timeout');return;}const second=Math.floor(elapsed());if(second!==lastSecond){lastSecond=second;updateMetrics();}},150);
   renderLibrary();renderHistory();reset();setFocusLabel();
