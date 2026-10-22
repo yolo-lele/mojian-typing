@@ -1,4 +1,4 @@
-# 南瓜头 · 书记员速录练习
+# 南瓜头 · 书记员练习
 
 在线使用：https://yolo-lele.github.io/nanguatou-typing/
 
